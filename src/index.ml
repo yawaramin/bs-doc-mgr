@@ -1,16 +1,17 @@
 type msg =
   Increment | Decrement | Reset | Edit of int | Set | Disable of bool
 
-(** Current value, current edit value, 'Set' button disabled *)
-let init_model = 0, 0, false
+type model = { cur_val : int; cur_edit : int; disabled : bool }
 
-let update (cur_val, cur_edit, disable) = function
-  | Increment -> cur_val + 1, cur_edit, disable
-  | Decrement -> cur_val - 1, cur_edit, disable
+let init_model = { cur_val = 0; cur_edit = 0; disabled = false }
+
+let update model = function
+  | Increment -> { model with cur_val = model.cur_val + 1 }
+  | Decrement -> { model with cur_val = model.cur_val - 1 }
   | Reset -> init_model
-  | Edit i -> cur_val, i, false
-  | Set -> cur_edit, cur_edit, disable
-  | Disable d -> cur_val, cur_edit, d
+  | Edit i -> { model with cur_edit = i; disabled = false }
+  | Set -> { model with cur_val = model.cur_edit }
+  | Disable d -> { model with disabled = d }
 
 let view_button ?(disabled=false) title msg =
   Tea.Html.(
@@ -21,7 +22,7 @@ let view_button ?(disabled=false) title msg =
 
       [text title])
 
-let view (cur_val, cur_edit, disabled) =
+let view { cur_val; cur_edit; disabled } =
   let open Tea.Html in
   let edit input_val =
     try Edit (int_of_string input_val) with _ -> Disable true in
